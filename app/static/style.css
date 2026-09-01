@@ -1,0 +1,93 @@
+:root {
+  --blue: #1a5fb4;
+  --green: #2ec27e;
+  --yellow: #e5a50a;
+  --red: #e01b24;
+  --bg: #f6f7f9;
+  --border: #dcdfe4;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: #1c1f24;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  background: white;
+  border-bottom: 1px solid var(--border);
+}
+.brand { font-weight: 700; font-size: 1.1rem; color: var(--blue); text-decoration: none; }
+.topbar nav a { margin-left: 16px; color: #333; text-decoration: none; }
+.topbar nav a:hover { text-decoration: underline; }
+.who { margin-left: 16px; color: #666; }
+
+.container { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+
+.card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 16px;
+}
+.card.narrow { max-width: 420px; }
+
+form label { display: block; margin-bottom: 12px; font-size: 0.9rem; color: #444; }
+form input, form select {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+form.inline-form { display: inline-block; }
+
+button {
+  background: var(--blue);
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+button:hover { opacity: 0.9; }
+button:disabled { background: #b0b0b0; cursor: not-allowed; }
+button.danger { background: var(--red); }
+
+.error { color: var(--red); font-weight: 600; }
+.hint { color: #666; font-size: 0.85rem; }
+
+.table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+.table th, .table td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); }
+.btn { background: var(--blue); color: white; padding: 6px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+
+.status { padding: 2px 8px; border-radius: 10px; font-size: 0.8rem; font-weight: 600; }
+.status.held { background: #fdf1cd; color: #986616; }
+.status.confirmed { background: #d8f3e3; color: #1c7a44; }
+.status.cancelled { background: #f4d6d8; color: #9c2530; }
+
+.legend { margin: 10px 0; font-size: 0.85rem; }
+.chip { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+.chip.available { background: var(--green); }
+.chip.held { background: var(--yellow); }
+.chip.booked { background: var(--red); }
+
+.seat-grid { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; }
+.seat { border: 1px solid var(--border); border-radius: 6px; padding: 6px; text-align: center; background: white; }
+.seat select { width: 90px; margin-bottom: 4px; font-size: 0.75rem; }
+.seat.available button { background: var(--green); }
+.seat.held button { background: var(--yellow); color: #333; }
+.seat.booked button { background: var(--red); }
+
+.leg { margin-bottom: 12px; }
+.train-options label { display: block; font-weight: normal; }

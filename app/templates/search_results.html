@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Search results{% endblock %}
+{% block content %}
+<h1>{{ from_station.name }} → {{ to_station.name }} <small>({{ journey_date }})</small></h1>
+
+{% if direct %}
+  <h2>Direct trains</h2>
+  <table class="table">
+    <thead><tr><th>Train</th><th>Dep</th><th>Arr</th><th></th></tr></thead>
+    <tbody>
+    {% for t in direct %}
+      <tr>
+        <td>{{ t.train_name }} ({{ t.train_number }})</td>
+        <td>{{ t.departure_time }}</td>
+        <td>{{ t.arrival_time }}</td>
+        <td>
+          <a class="btn" href="/seatmap/{{ t.train_id }}?from_station_id={{ from_station.id }}&to_station_id={{ to_station.id }}&journey_date={{ journey_date }}">View seats</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% elif connections %}
+  <h2>No direct seats — connecting trains found</h2>
+  <p class="hint">1-transfer connections only, with a minimum layover enforced at the transfer station.</p>
+  <table class="table">
+    <thead><tr><th>First leg</th><th>Via</th><th>Second leg</th><th></th></tr></thead>
+    <tbody>
+    {% for c in connections %}
+      <tr>
+        <td>{{ c.first.train_name }} ({{ c.first.train_number }})<br>{{ c.first.departure_time }} → {{ c.first.arrival_time }}</td>
+        <td>{{ c.via_station_name }}</td>
+        <td>{{ c.second.train_name }} ({{ c.second.train_number }})<br>{{ c.second.departure_time }} → {{ c.second.arrival_time }}</td>
+        <td>
+          <a class="btn" href="/seatmap/{{ c.first.train_id }}?from_station_id={{ from_station.id }}&to_station_id={{ c.via_station_id }}&journey_date={{ journey_date }}">Book leg 1</a>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No direct trains or connections found for this route.</p>
+  <p class="hint">If a specific train runs this route but has no single free seat end-to-end,
+  open its seat map and use "Try split-ticket" there — it looks for a mid-journey vacancy.</p>
+{% endif %}
+
+<p><a href="/search">← New search</a></p>
+{% endblock %}

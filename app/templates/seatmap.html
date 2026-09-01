@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}Seat map — {{ train.name }}{% endblock %}
+{% block content %}
+<h1>{{ train.name }} ({{ train.number }})</h1>
+<p>{{ from_station.name }} → {{ to_station.name }} · {{ journey_date }}</p>
+
+{% if request.query_params.get('error') == 'unavailable' %}
+  <p class="error">That seat was taken by someone else just now — pick another.</p>
+{% endif %}
+
+<form method="get" class="inline-form">
+  <input type="hidden" name="from_station_id" value="{{ from_station.id }}">
+  <input type="hidden" name="to_station_id" value="{{ to_station.id }}">
+  <input type="hidden" name="journey_date" value="{{ journey_date }}">
+  <label>Book together (group size)
+    <select name="group_size" onchange="this.form.submit()">
+      {% for n in range(1,7) %}
+        <option value="{{ n }}" {% if n == group_size %}selected{% endif %}>{{ n }}</option>
+      {% endfor %}
+    </select>
+  </label>
+</form>
+
+{% if group_size > 1 %}
+  {% if suggested_group %}
+    <p class="hint">Suggested seats to sit together:
+      {% for s in suggested_group %}{{ s.coach_number }}-{{ s.seat.seat_number }}{% if not loop.last %}, {% endif %}{% endfor %}
+    </p>
+  {% else %}
+    <p class="error">No {{ group_size }} adjacent seats available in one coach.</p>
+  {% endif %}
+{% endif %}
+
+<div class="legend">
+  <span class="chip available"></span> Available
+  <span class="chip held"></span> Held
+  <span class="chip booked"></span> Booked
+</div>
+
+{% for coach in coaches %}
+  <h3>Coach {{ coach.coach_number }} <small>({{ coach.coach_type }})</small></h3>
+  <div class="seat-grid">
+    {% for row in coach.seats %}
+      <form method="post" action="/book" class="seat {{ row.status }}">
+        <input type="hidden" name="train_id" value="{{ train.id }}">
+        <input type="hidden" name="seat_id" value="{{ row.seat.id }}">
+        <input type="hidden" name="from_station_id" value="{{ from_station.id }}">
+        <input type="hidden" name="to_station_id" value="{{ to_station.id }}">
+        <input type="hidden" name="journey_date" value="{{ journey_date }}">
+        <select name="ticket_type" {% if row.status != 'available' %}disabled{% endif %}>
+          <option value="general">General</option>
+          <option value="tatkal">Tatkal</option>
+          <option value="ladies">Ladies</option>
+          <option value="senior">Senior</option>
+        </select>
+        <button type="submit" {% if row.status != 'available' %}disabled{% endif %}>
+          {{ row.seat.seat_number }} ({{ row.seat.position.value }})
+        </button>
+      </form>
+    {% endfor %}
+  </div>
+{% endfor %}
+
+<hr>
+<p>No single seat free for the whole route?</p>
+<form method="post" action="/book/split">
+  <input type="hidden" name="train_id" value="{{ train.id }}">
+  <input type="hidden" name="from_station_id" value="{{ from_station.id }}">
+  <input type="hidden" name="to_station_id" value="{{ to_station.id }}">
+  <input type="hidden" name="journey_date" value="{{ journey_date }}">
+  <select name="ticket_type">
+    <option value="general">General</option>
+    <option value="tatkal">Tatkal</option>
+    <option value="ladies">Ladies</option>
+    <option value="senior">Senior</option>
+  </select>
+  <button type="submit">Try split-ticket booking</button>
+</form>
+{% endblock %}

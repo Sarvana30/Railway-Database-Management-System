@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Trip #{{ trip.id }}{% endblock %}
+{% block content %}
+<h1>Trip #{{ trip.id }}</h1>
+<p class="hint">Cancellation is per-leg — cancelling one leg does not affect the others.</p>
+<table class="table">
+  <thead><tr><th>Leg</th><th>Train</th><th>Route</th><th>Date</th><th>Seat</th><th>Status</th><th></th></tr></thead>
+  <tbody>
+  {% for b in trip.bookings %}
+    <tr>
+      <td>{{ b.leg_order }}</td>
+      <td>{{ b.train.name }}</td>
+      <td>{{ b.from_station.name }} → {{ b.to_station.name }}</td>
+      <td>{{ b.journey_date }}</td>
+      <td>{{ b.seat.coach.coach_number }}-{{ b.seat.seat_number }}</td>
+      <td><span class="status {{ b.status.value }}">{{ b.status.value }}</span></td>
+      <td><a href="/bookings/{{ b.id }}">View / confirm / cancel</a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<p><a href="/my-bookings">← My bookings</a></p>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}My bookings{% endblock %}
+{% block content %}
+<h1>My bookings</h1>
+{% if not bookings %}
+  <p>No bookings yet. <a href="/search">Search for a train</a>.</p>
+{% else %}
+  <table class="table">
+    <thead><tr><th>#</th><th>Train</th><th>Route</th><th>Date</th><th>Seat</th><th>Type</th><th>Status</th><th></th></tr></thead>
+    <tbody>
+    {% for b in bookings %}
+      <tr>
+        <td>{{ b.id }}</td>
+        <td>{{ b.train.name }}</td>
+        <td>{{ b.from_station.name }} → {{ b.to_station.name }}</td>
+        <td>{{ b.journey_date }}</td>
+        <td>{{ b.seat.coach.coach_number }}-{{ b.seat.seat_number }}</td>
+        <td>{{ b.ticket_type.value }}</td>
+        <td><span class="status {{ b.status.value }}">{{ b.status.value }}</span>{% if b.trip_id %} <small>(trip #{{ b.trip_id }} leg {{ b.leg_order }})</small>{% endif %}</td>
+        <td><a href="/bookings/{{ b.id }}">View</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Booking #{{ booking.id }}{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h1>Booking #{{ booking.id }}</h1>
+  {% if error %}<p class="error">{{ error }}</p>{% endif %}
+  <p><strong>Train:</strong> {{ booking.train.name }} ({{ booking.train.number }})</p>
+  <p><strong>Seat:</strong> {{ booking.seat.coach.coach_number }}-{{ booking.seat.seat_number }}</p>
+  <p><strong>Route:</strong> {{ booking.from_station.name }} → {{ booking.to_station.name }}</p>
+  <p><strong>Date:</strong> {{ booking.journey_date }}</p>
+  <p><strong>Ticket type:</strong> {{ booking.ticket_type.value }}</p>
+  <p><strong>Status:</strong> <span class="status {{ booking.status.value }}">{{ booking.status.value }}</span></p>
+  {% if booking.refund_status.value != 'none' %}
+    <p><strong>Refund:</strong> {{ booking.refund_status.value }}</p>
+  {% endif %}
+  {% if booking.status.value == 'held' %}
+    <p class="hint">Hold expires at {{ booking.hold_expires_at }} (UTC). Confirm before then.</p>
+    <form method="post" action="/bookings/{{ booking.id }}/confirm">
+      <button type="submit">Confirm booking</button>
+    </form>
+  {% endif %}
+  {% if booking.status.value != 'cancelled' %}
+    <form method="post" action="/bookings/{{ booking.id }}/cancel">
+      <button type="submit" class="danger">Cancel & refund</button>
+    </form>
+  {% endif %}
+  <p><a href="/my-bookings">← My bookings</a></p>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Trip planner{% endblock %}
+{% block content %}
+<h1>Multi-city trip planner</h1>
+<p class="hint">Add each city hop, pick a train for it, then book the whole trip atomically —
+either every leg is confirmed or none is.</p>
+{% if error %}<p class="error">{{ error }}</p>{% endif %}
+
+<div id="legs"></div>
+<button type="button" id="add-leg">+ Add leg</button>
+
+<form method="post" action="/trip-planner/book" id="trip-form">
+  <div id="hidden-fields"></div>
+  <button type="submit">Book entire trip</button>
+</form>
+
+<template id="leg-template">
+  <div class="card leg">
+    <h3>Leg</h3>
+    <label>From
+      <select class="leg-from">
+        {% for s in stations %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>To
+      <select class="leg-to">
+        {% for s in stations %}<option value="{{ s.id }}">{{ s.name }}</option>{% endfor %}
+      </select>
+    </label>
+    <label>Date <input type="date" class="leg-date"></label>
+    <label>Ticket type
+      <select class="leg-ticket-type">
+        <option value="general">General</option>
+        <option value="tatkal">Tatkal</option>
+        <option value="ladies">Ladies</option>
+        <option value="senior">Senior</option>
+      </select>
+    </label>
+    <button type="button" class="find-trains">Find trains</button>
+    <div class="train-options"></div>
+    <button type="button" class="remove-leg">Remove leg</button>
+  </div>
+</template>
+
+<script src="/static/trip_planner.js"></script>
+{% endblock %}
