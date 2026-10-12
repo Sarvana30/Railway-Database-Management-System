@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Create Account</h1>
+        <form id="signup-form" method="POST">
+            <label for="name">Name</label>
+            <input type="text" name="name" id="name" placeholder="Full name" autocomplete="name" required>
+
+            <label for="gmail">Gmail</label>
+            <input type="email" name="gmail" id="gmail" placeholder="Enter your gmail" autocomplete="email" required>
+
+            <label for="phone">Phone</label>
+            <input type="tel" name="phone" id="phone" placeholder="Phone number" maxlength="15" autocomplete="tel" required>
+
+            <label for="password">Password</label>
+            <input type="password" name="password" id="password" placeholder="Choose a password" minlength="6" autocomplete="new-password" required>
+
+            <button type="submit">Sign up</button>
+        </form>
+        <p class="auth-link">Already have an account? <a href="login_page.html">Login</a></p>
+    </div>
+</body>
+</html>
