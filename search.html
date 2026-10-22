@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Search trains{% endblock %}
+{% block content %}
+<div class="card narrow">
+  <h1>Search trains</h1>
+  <form method="get" action="/search/results">
+    <label>From
+      <select name="from_station_id" required>
+        {% for s in stations %}<option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>{% endfor %}
+      </select>
+    </label>
+    <label>To
+      <select name="to_station_id" required>
+        {% for s in stations %}<option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>{% endfor %}
+      </select>
+    </label>
+    <label>Date
+      <input type="date" name="journey_date" value="{{ today }}" required>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+</div>
+{% endblock %}
