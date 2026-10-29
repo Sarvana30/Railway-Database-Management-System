@@ -1,13 +1,8 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
-
-DATABASE_URL = "mysql+pymysql://root:Shahid%40321@localhost:3306/railway_management_system"
-
-engine = create_engine(DATABASE_URL, pool_pre_ping=True)
-SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+from app.database import SessionLocal
 
 
 def get_db():
+    """Provide a request-scoped session backed by the shared engine pool."""
     db = SessionLocal()
     try:
         yield db
