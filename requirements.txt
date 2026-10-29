@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+sqlalchemy
+pymysql
+cryptography
+pwdlib[argon2]
+jinja2
+python-multipart
+itsdangerous
+python-dotenv
+networkx

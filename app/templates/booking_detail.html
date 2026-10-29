@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Booking details</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Booking details</h1>
+
+    {% if error %}
+        <p role="alert">{{ error }}</p>
+    {% endif %}
+    {% if cancelled %}
+        <p role="status">Your booking has been cancelled. Its seats are available again.</p>
+    {% endif %}
+
+    <p>Train: {{ booking.train_number }} — {{ booking.train_name }}</p>
+    <p>{{ booking.origin_name }} to {{ booking.destination_name }}</p>
+    <p>Departs: {{ booking.departure_at.strftime("%d %b %Y, %H:%M") }}</p>
+    <p>Arrives: {{ booking.arrival_at.strftime("%d %b %Y, %H:%M") }}</p>
+    <p>Ticket type: {{ booking.ticket_type }}</p>
+    <p>Status: {{ booking.status }}</p>
+    <p>Payment status: {{ booking.payment_status }}</p>
+    <p>Refund status: {{ booking.refund_status }}</p>
+    {% if booking.fare_model == "DISTANCE_SLAB" %}
+        <h2>Fare breakdown</h2>
+        <p>Your journey distance: {{ booking.distance_km }} km</p>
+        <p>Train route distance: {{ booking.train_route_distance_km }} km</p>
+        <p>{{ booking.train_type }} base fare factor: ×{{ "%.3f" | format(booking.train_type_multiplier) }}</p>
+        <p>Route length factor: ×{{ "%.3f" | format(booking.route_length_multiplier) }}</p>
+        <p>Base fare: ₹{{ "%.2f" | format(booking.base_fare_amount) }}</p>
+        <p>Reservation fee: ₹{{ "%.2f" | format(booking.reservation_fee_amount) }}</p>
+        <p>Superfast charge: ₹{{ "%.2f" | format(booking.superfast_charge_amount) }}</p>
+        <p>GST: ₹{{ "%.2f" | format(booking.gst_amount) }}</p>
+        <p>Fare rounding: ₹{{ "%.2f" | format(booking.rounding_amount) }}</p>
+    {% endif %}
+    <p><strong>Total fare: ₹{{ "%.2f" | format(booking.fare_amount) }}</strong></p>
+
+    <h2>Passengers and seats</h2>
+    <ul>
+        {% for passenger in passengers %}
+            <li>
+                {{ passenger.name }}, age {{ passenger.age }} —
+                {{ passenger.from_station_name }} to {{ passenger.to_station_name }}:
+                {{ passenger.compartment_number }} {{ passenger.compartment_type }},
+                seat {{ passenger.seat_number }}
+            </li>
+        {% endfor %}
+    </ul>
+
+    {% if booking.status == "CONFIRMED" and booking.can_cancel %}
+        <p>Your booking is confirmed and your selected seats are booked.</p>
+        <p><a href="/bookings/{{ booking.ticket_id }}/cancel">Cancel this booking</a></p>
+    {% elif booking.status == "CONFIRMED" %}
+        <p>Your booking is confirmed. It can no longer be cancelled because the scheduled departure has passed.</p>
+    {% else %}
+        <p>This booking is cancelled. The payment has been marked as refunded.</p>
+    {% endif %}
+
+    <p><a href="/search">Search trains</a></p>
+</body>
+</html>

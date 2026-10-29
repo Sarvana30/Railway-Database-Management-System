@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Seat availability</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Seat availability</h1>
+
+    <p>{{ availability.origin_name }} to {{ availability.destination_name }}</p>
+    <p>Departs: {{ availability.departure_at.strftime("%d %b %Y, %H:%M") }}</p>
+    <p>Arrives: {{ availability.arrival_at.strftime("%d %b %Y, %H:%M") }}</p>
+
+    {% if error %}
+        <p role="alert">{{ error }}</p>
+    {% endif %}
+
+    {% set available_seats = availability.seats | selectattr("is_available") | list %}
+
+    {% if available_seats %}
+        {% set seat_categories = available_seats | map(attribute="compartment_type") | unique | list %}
+        <h2>Available seat categories</h2>
+        <ul>
+            {% for category in seat_categories %}
+                {% set category_seats = available_seats | selectattr("compartment_type", "equalto", category) | list %}
+                <li>
+                    {{ category }} — {{ category_seats | length }} seats available
+                    {% if category_seats[0].fare_per_passenger is not none %}
+                        · {{ category_seats[0].fare.distance_km }} km
+                        · ₹{{ "%.2f" | format(category_seats[0].fare_per_passenger) }} per passenger
+                    {% else %}
+                        · fare unavailable
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+
+        <h2>Passenger details</h2>
+        <form method="post" action="/bookings">
+            <input type="hidden" name="train_run_id" value="{{ availability.train_run_id }}">
+            <input type="hidden" name="from_station_id" value="{{ request.query_params.get('from_station_id') }}">
+            <input type="hidden" name="to_station_id" value="{{ request.query_params.get('to_station_id') }}">
+
+            <label for="seat_category">Seat category</label>
+            <select id="seat_category" name="seat_category" required>
+                <option value="">Choose a category</option>
+                {% for category in seat_categories %}
+                    <option value="{{ category }}">{{ category }}</option>
+                {% endfor %}
+            </select>
+
+            <label for="ticket_type">Ticket type</label>
+            <select id="ticket_type" name="ticket_type" required>
+                <option value="GENERAL">General</option>
+                <option value="TATKAL">Tatkal</option>
+                <option value="LADIES">Ladies</option>
+                <option value="SENIOR">Senior</option>
+            </select>
+
+            <div id="passengers">
+                <div class="passenger-row">
+                    <h3>Passenger</h3>
+                    <label>Name<input name="passenger_names" type="text" maxlength="100" required></label>
+                    <label>Age<input name="passenger_ages" type="number" min="0" max="255" required></label>
+                    <label>Gender
+                        <select name="passenger_genders" required>
+                            <option value="UNSPECIFIED">Prefer not to say</option>
+                            <option value="F">Female</option>
+                            <option value="M">Male</option>
+                            <option value="OTHER">Other</option>
+                        </select>
+                    </label>
+                    <label>Seat number
+                        <select name="seat_ids" required disabled><option value="">Choose a category first</option></select>
+                    </label>
+                    <button type="button" class="remove-passenger">Remove passenger</button>
+                </div>
+            </div>
+            <button type="button" id="add-passenger">Add passenger</button>
+            <button type="submit">Continue to payment</button>
+        </form>
+
+        <template id="passenger-template">
+            <div class="passenger-row">
+                <h3>Passenger</h3>
+                <label>Name<input name="passenger_names" type="text" maxlength="100" required></label>
+                <label>Age<input name="passenger_ages" type="number" min="0" max="255" required></label>
+                <label>Gender
+                    <select name="passenger_genders" required>
+                        <option value="UNSPECIFIED">Prefer not to say</option>
+                        <option value="F">Female</option>
+                        <option value="M">Male</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </label>
+                <label>Seat number
+                    <select name="seat_ids" required disabled><option value="">Choose a category first</option></select>
+                </label>
+                <button type="button" class="remove-passenger">Remove passenger</button>
+            </div>
+        </template>
+
+        <template id="available-seat-options">
+            {% for seat in available_seats %}
+                <option value="{{ seat.seat_id }}" data-category="{{ seat.compartment_type }}">
+                    {{ seat.compartment_number }} — seat {{ seat.seat_number }}
+                </option>
+            {% endfor %}
+        </template>
+    {% elif availability.seats %}
+        <p>No seats are currently available for this journey.</p>
+    {% else %}
+        <p>No seats are configured for this train.</p>
+    {% endif %}
+
+    <p><a href="/search">Search again</a></p>
+
+    <script>
+        const passengerList = document.getElementById("passengers");
+        const passengerTemplate = document.getElementById("passenger-template");
+        const addPassengerButton = document.getElementById("add-passenger");
+        const seatCategorySelect = document.getElementById("seat_category");
+        const availableSeatOptions = document.getElementById("available-seat-options");
+
+        function updateSeatOptions() {
+            if (!passengerList || !availableSeatOptions || !seatCategorySelect) return;
+            const seatSelects = [...passengerList.querySelectorAll('select[name="seat_ids"]')];
+            seatSelects.forEach((seatSelect) => {
+                const previousValue = seatSelect.value;
+                const selectedByOthers = new Set(
+                    seatSelects.filter((other) => other !== seatSelect)
+                        .map((other) => other.value).filter(Boolean)
+                );
+                seatSelect.replaceChildren(new Option("Choose a seat number", ""));
+                seatSelect.disabled = !seatCategorySelect.value;
+                if (!seatCategorySelect.value) return;
+                availableSeatOptions.content.querySelectorAll("option").forEach((option) => {
+                    if (option.dataset.category === seatCategorySelect.value
+                        && !selectedByOthers.has(option.value)) {
+                        seatSelect.add(option.cloneNode(true));
+                    }
+                });
+                if ([...seatSelect.options].some((option) => option.value === previousValue)) {
+                    seatSelect.value = previousValue;
+                }
+            });
+        }
+
+        if (passengerList && passengerTemplate && addPassengerButton) {
+            addPassengerButton.addEventListener("click", () => {
+                passengerList.appendChild(passengerTemplate.content.cloneNode(true));
+                updateSeatOptions();
+            });
+            passengerList.addEventListener("click", (event) => {
+                if (event.target.classList.contains("remove-passenger")
+                    && passengerList.querySelectorAll(".passenger-row").length > 1) {
+                    event.target.closest(".passenger-row").remove();
+                    updateSeatOptions();
+                }
+            });
+            passengerList.addEventListener("change", (event) => {
+                if (event.target.matches('select[name="seat_ids"]')) updateSeatOptions();
+            });
+        }
+        if (seatCategorySelect) {
+            seatCategorySelect.addEventListener("change", () => {
+                passengerList.querySelectorAll('select[name="seat_ids"]')
+                    .forEach((select) => select.value = "");
+                updateSeatOptions();
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Train search results</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Search results</h1>
+
+    <p>
+        {{ from_station.name }} to {{ to_station.name }}
+        on {{ journey_date.strftime("%d %b %Y") }}
+    </p>
+
+    {% if results %}
+        <ul>
+            {% for result in results %}
+                <li>
+                    <strong>{{ result.train_number }} — {{ result.train_name }}</strong>
+                    <div>Departs: {{ result.departure_at.strftime("%d %b %Y, %H:%M") }}</div>
+                    <div>Arrives: {{ result.arrival_at.strftime("%d %b %Y, %H:%M") }}</div>
+                    <a href="/availability/{{ result.train_run_id }}?from_station_id={{ from_station.id }}&to_station_id={{ to_station.id }}">
+                        Check seat availability
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No direct trains found for that journey and date.</p>
+    {% endif %}
+
+    {% if connection_suggestions %}
+        <h2>Suggested connections</h2>
+        <p>These are separate journeys, not a combined booking. Seat availability is not checked or reserved. You will need to check and book each train separately. Estimated fares use Sleeper class.</p>
+        <ol>
+            {% for suggestion in connection_suggestions %}
+                <li>
+                    <strong>Estimated total: ₹{{ "%.2f"|format(suggestion.estimated_fare) }} per passenger (Sleeper) · {{ (suggestion.total_duration.days * 24 + suggestion.total_duration.seconds // 3600) }}h {{ ((suggestion.total_duration.seconds % 3600) // 60) }}m total</strong>
+                    <div>
+                        {{ suggestion.first_leg.train_number }} — {{ suggestion.first_leg.train_name }}:
+                        {{ from_station.name }} → {{ suggestion.interchange.name }}
+                    </div>
+                    <div>
+                        Departs {{ suggestion.first_leg.departure_at.strftime("%d %b %Y, %H:%M") }} ·
+                        Arrives {{ suggestion.first_leg.arrival_at.strftime("%d %b %Y, %H:%M") }}
+                    </div>
+                    <a href="/availability/{{ suggestion.first_leg.train_run_id }}?from_station_id={{ from_station.id }}&to_station_id={{ suggestion.interchange.id }}">Check seats for leg 1</a>
+                    <div>Change at {{ suggestion.interchange.name }} · {{ (suggestion.transfer_wait.seconds // 3600) }}h {{ ((suggestion.transfer_wait.seconds % 3600) // 60) }}m between trains</div>
+                    <div>
+                        {{ suggestion.second_leg.train_number }} — {{ suggestion.second_leg.train_name }}:
+                        {{ suggestion.interchange.name }} → {{ to_station.name }}
+                    </div>
+                    <div>
+                        Departs {{ suggestion.second_leg.departure_at.strftime("%d %b %Y, %H:%M") }} ·
+                        Arrives {{ suggestion.second_leg.arrival_at.strftime("%d %b %Y, %H:%M") }}
+                    </div>
+                    <a href="/availability/{{ suggestion.second_leg.train_run_id }}?from_station_id={{ suggestion.interchange.id }}&to_station_id={{ to_station.id }}">Check seats for leg 2</a>
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+    <p><a href="/search">Search again</a></p>
+</body>
+</html>

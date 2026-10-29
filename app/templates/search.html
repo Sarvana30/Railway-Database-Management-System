@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Search trains</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Search trains</h1>
+
+    {% if error %}
+        <p role="alert">{{ error }}</p>
+    {% endif %}
+
+    <form id="train-search-form" method="get" action="/search">
+        <label for="from_station_id">From</label>
+        <select id="from_station_id" name="from_station_id" required>
+            <option value="">Choose a station</option>
+            {% for station in stations %}
+                <option value="{{ station.id }}"
+                    {% if from_station_id == station.id %}selected{% endif %}>
+                    {{ station.name }} ({{ station.city }})
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="to_station_id">To</label>
+        <select id="to_station_id" name="to_station_id" required>
+            <option value="">Choose a station</option>
+            {% for station in stations %}
+                <option value="{{ station.id }}"
+                    {% if to_station_id == station.id %}selected{% endif %}>
+                    {{ station.name }} ({{ station.city }})
+                </option>
+            {% endfor %}
+        </select>
+
+        <label for="journey_date">Travel date</label>
+        <input
+            id="journey_date"
+            name="journey_date"
+            type="date"
+            min="{{ min_journey_date.isoformat() }}"
+            max="{{ max_journey_date.isoformat() }}"
+            value="{{ journey_date.isoformat() if journey_date else '' }}"
+            required
+        >
+
+        <button type="submit">Search</button>
+    </form>
+
+    <p id="same-station-error" role="alert" hidden>
+        From and To stations cannot be the same.
+    </p>
+
+    <p><a href="/login">Log in</a> · <a href="/signup">Sign up</a></p>
+
+    <script>
+        const searchForm = document.getElementById("train-search-form");
+        const fromStation = document.getElementById("from_station_id");
+        const toStation = document.getElementById("to_station_id");
+        const sameStationError = document.getElementById("same-station-error");
+
+        function validateStations() {
+            const sameStation = fromStation.value && fromStation.value === toStation.value;
+            sameStationError.hidden = !sameStation;
+            return !sameStation;
+        }
+
+        fromStation.addEventListener("change", validateStations);
+        toStation.addEventListener("change", validateStations);
+        searchForm.addEventListener("submit", (event) => {
+            if (!validateStations()) {
+                event.preventDefault();
+            }
+        });
+    </script>
+</body>
+</html>

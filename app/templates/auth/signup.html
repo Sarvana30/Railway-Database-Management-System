@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Sign up</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Create an account</h1>
+
+    {% if error == "invalid_input" %}
+        <p role="alert">Check your details. Passwords must have at least 8 characters.</p>
+    {% elif error == "account_exists" %}
+        <p role="alert">An account with that email or phone already exists.</p>
+    {% endif %}
+
+    <form method="post" action="/signup">
+        <label for="name">Name</label>
+        <input id="name" name="name" type="text" maxlength="100" required>
+
+        <label for="phone">Phone</label>
+        <input id="phone" name="phone" type="tel" maxlength="20" required>
+
+        <label for="gmail">Email</label>
+        <input id="gmail" name="gmail" type="email" maxlength="254" required>
+
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" minlength="8" required>
+
+        <button type="submit">Sign up</button>
+    </form>
+
+    <p>Already registered? <a href="/login">Log in</a></p>
+</body>
+</html>

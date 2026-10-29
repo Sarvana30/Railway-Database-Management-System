@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Bookings</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main>
+        <h1>My Bookings</h1>
+
+        {% if bookings %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking</th>
+                        <th>Train</th>
+                        <th>Journey</th>
+                        <th>Date</th>
+                        <th>Departure</th>
+                        <th>Arrival</th>
+                        <th>Passengers</th>
+                        <th>Ticket type</th>
+                        <th>Fare</th>
+                        <th>Status</th>
+                        <th>Refund status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>#{{ booking.ticket_id }}</td>
+                            <td>{{ booking.train_number }} — {{ booking.train_name }}</td>
+                            <td>{{ booking.origin_name }} → {{ booking.destination_name }}</td>
+                            <td>{{ booking.service_date.strftime("%d %b %Y") }}</td>
+                            <td>{{ booking.departure_at.strftime("%H:%M") }}</td>
+                            <td>{{ booking.arrival_at.strftime("%H:%M") }}</td>
+                            <td>{{ booking.passenger_count }}</td>
+                            <td>{{ booking.ticket_type }}</td>
+                            <td>₹{{ "%.2f" | format(booking.fare_amount) }}</td>
+                            <td>{{ booking.display_status }}</td>
+                            <td>
+                                {% if booking.display_status == "CANCELLED" %}
+                                    {% if booking.refund_status == "REFUNDED" %}
+                                        Refunded
+                                    {% elif booking.refund_status == "NONE" %}
+                                        Not refunded
+                                    {% else %}
+                                        {{ booking.refund_status }}
+                                    {% endif %}
+                                {% else %}
+                                    —
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="/bookings/{{ booking.ticket_id }}">View booking</a>
+                                {% if booking.display_status == "CONFIRMED" and booking.can_cancel %}
+                                    · <a href="/bookings/{{ booking.ticket_id }}/cancel">Cancel booking</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>You do not have any bookings yet.</p>
+        {% endif %}
+
+        <p><a href="/search">Search trains</a></p>
+    </main>
+</body>
+</html>

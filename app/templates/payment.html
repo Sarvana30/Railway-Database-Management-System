@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Payment</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <main>
+        <h1>Payment</h1>
+        <h2>Booking summary</h2>
+        <p>Train: {{ journey.train_number }} — {{ journey.train_name }}</p>
+        <p>{{ journey.origin_name }} to {{ journey.destination_name }}</p>
+        <p>Departs: {{ journey.departure_at.strftime("%d %b %Y, %H:%M") }}</p>
+        <p>Arrives: {{ journey.arrival_at.strftime("%d %b %Y, %H:%M") }}</p>
+        <p>Passengers: {{ passenger_names | length }}</p>
+        <p>Seat category: {{ seat_category }}</p>
+        <p>Ticket type: {{ ticket_type }}</p>
+        <p>Your selected seats are held until {{ hold_expires_at.strftime("%d %b %Y, %H:%M:%S") }}.</p>
+        <p>If you do not finish before then, the hold expires and the seats become available again.</p>
+        <h3>Fare breakdown</h3>
+        <p>Your journey distance: {{ fare.distance_km }} km</p>
+        <p>Train route distance: {{ fare.train_route_distance_km }} km</p>
+        <p>Train type: {{ fare.train_type }} (base fare factor ×{{ "%.3f" | format(fare.train_type_multiplier) }})</p>
+        <p>Route length factor: ×{{ "%.3f" | format(fare.route_length_multiplier) }}</p>
+        <p>Base fare: ₹{{ "%.2f" | format(fare.base_fare_total) }}</p>
+        <p>Reservation fee: ₹{{ "%.2f" | format(fare.reservation_fee_total) }}</p>
+        <p>Superfast charge: ₹{{ "%.2f" | format(fare.superfast_charge_total) }}</p>
+        <p>GST ({{ "%.2f" | format(fare.gst_percent) }}%): ₹{{ "%.2f" | format(fare.gst_total) }}</p>
+        <p>Railway fare rounding: ₹{{ "%.2f" | format(fare.rounding_total) }}</p>
+        <p><strong>Total payable: ₹{{ "%.2f" | format(total_fare) }}</strong></p>
+
+        <form method="post" action="/bookings">
+            <input type="hidden" name="train_run_id" value="{{ train_run_id }}">
+            <input type="hidden" name="from_station_id" value="{{ from_station_id }}">
+            <input type="hidden" name="to_station_id" value="{{ to_station_id }}">
+            <input type="hidden" name="seat_category" value="{{ seat_category }}">
+            <input type="hidden" name="ticket_type" value="{{ ticket_type }}">
+            <input type="hidden" name="payment_confirmed" value="true">
+            <input type="hidden" name="hold_token" value="{{ hold_token }}">
+            {% for seat_id in seat_ids %}
+                <input type="hidden" name="seat_ids" value="{{ seat_id }}">
+            {% endfor %}
+            {% for name in passenger_names %}
+                <input type="hidden" name="passenger_names" value="{{ name }}">
+            {% endfor %}
+            {% for age in passenger_ages %}
+                <input type="hidden" name="passenger_ages" value="{{ age }}">
+            {% endfor %}
+            {% for gender in passenger_genders %}
+                <input type="hidden" name="passenger_genders" value="{{ gender }}">
+            {% endfor %}
+            <button type="submit">Pay ₹{{ "%.2f" | format(total_fare) }} now</button>
+        </form>
+
+        <form method="post" action="/booking-holds/release">
+            <input type="hidden" name="hold_token" value="{{ hold_token }}">
+            <button type="submit">Release seats and go back</button>
+        </form>
+    </main>
+</body>
+</html>
