@@ -7,7 +7,8 @@ load_dotenv()
 
 class Settings:
     DATABASE_URL: str = os.getenv(
-        "DATABASE_URL", "mysql+pymysql://railway:railway@localhost:3306/railway"
+        "DATABASE_URL",
+        "mysql+pymysql://root:Shahid%40321@localhost:3306/railway_management_system",
     )
     SESSION_SECRET: str = os.getenv("SESSION_SECRET", "dev-secret-change-me")
     HOLD_DURATION_MINUTES: int = int(os.getenv("HOLD_DURATION_MINUTES", "5"))
